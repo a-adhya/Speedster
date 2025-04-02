@@ -1,9 +1,22 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '../../context/AuthContext';
 import styles from './ProfileScreenStyles';
 
 export default function ProfileScreen() {
+  const { user, signOut } = useAuth();
+  const userEmail = user?.email || 'No email';
+  const userName = user?.user_metadata?.name || userEmail.split('@')[0] || 'User';
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      Alert.alert('Error signing out', error.message);
+    }
+  };
+
   const handleFollowersPress = () => {
     Alert.alert('Followers', 'Navigate to Followers List');
   };
@@ -20,7 +33,7 @@ export default function ProfileScreen() {
           style={styles.profilePic}
         />
         <View style={styles.infoContainer}>
-          <Text style={styles.name}>John Doe</Text>
+          <Text style={styles.name}>{userName}</Text>
           <View style={styles.followContainer}>
             <TouchableOpacity style={styles.followBox} onPress={handleFollowersPress}>
               <Text style={styles.followText}>Followers</Text>
@@ -55,6 +68,13 @@ export default function ProfileScreen() {
           <Text style={styles.detailText}>Run a sub-3 hour marathon</Text>
         </View>
       </View>
+      <TouchableOpacity 
+        style={styles.signOutButton} 
+        onPress={handleSignOut}
+      >
+        <Ionicons name="log-out-outline" size={24} color="red" />
+        <Text style={styles.signOutText}>Sign Out</Text>
+      </TouchableOpacity>
     </View>
   );
 }

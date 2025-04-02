@@ -57,6 +57,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-start',
   },
+  signOutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 30,
+    padding: 10,
+  },
+  signOutText: {
+    color: 'red',
+    fontSize: 16,
+    marginLeft: 10,
+  },
 });
 
 export default styles;
