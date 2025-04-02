@@ -1,8 +1,8 @@
-import React from 'react';
+import React from "react";
+import { Tabs } from "expo-router";
 import { Ionicons } from '@expo/vector-icons';
-import { Tabs } from 'expo-router';
 
-export default function Footer() {
+export default function AuthenticatedLayout() {
   return (
     <Tabs
       screenOptions={({ route }) => ({
@@ -32,4 +32,4 @@ export default function Footer() {
       <Tabs.Screen name="profile" />
     </Tabs>
   );
-}
+} 
