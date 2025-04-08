@@ -51,13 +51,30 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const signUp = async (email, password) => {
+  const signUp = async (userData) => {
+    const { email, password, name, location, trainingFor, runSkill, swimSkill, bikeSkill, goal } = userData;
     try {
       const { error, data } = await supabase.auth.signUp({
         email,
         password,
       });
       if (error) throw error;
+
+      // Insert user data into the "users" table
+      const { insertError } = await supabase
+        .from('users')
+        .insert([{
+          username: name,
+          training_for: trainingFor || 'None',
+          run_skill: parseInt(runSkill, 10),
+          swim_skill: parseInt(swimSkill, 10),
+          bike_skill: parseInt(bikeSkill, 10),
+          current_location: location,
+          goal: goal || 'None',
+        }]);
+
+      if (insertError) throw insertError;
+
       return data;
     } catch (error) {
       console.error('Error signing up:', error.message);
