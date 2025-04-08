@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import React, { useState, useEffect } from 'react';
+import { SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
+import DropDownPicker from 'react-native-dropdown-picker';
 import { Ionicons } from '@expo/vector-icons';
 import DisciplineDropdown from '../../components/DisciplineDropdown';
+import { supabase } from '../../utils/supabaseClient';
 
 const AthleteView = ({ athlete }) => (
   <View style={styles.athleteContainer}>
@@ -34,80 +35,100 @@ export default function ExploreScreen() {
   const [expertise, setExpertise] = useState('1');
   const [selectedDisciplines, setSelectedDisciplines] = useState([]);
   const [gender, setGender] = useState('male');
+  const [athletes, setAthletes] = useState([]);
 
-  const athletes = [
-    {
-      profilePic: 'https://via.placeholder.com/50',
-      name: 'Athlete 1',
-      disciplines: [
-        { icon: 'walk', expertise: 3 },
-        { icon: 'bicycle', expertise: 2 },
-      ],
-      location: 'New York',
-    },
-    {
-      profilePic: 'https://via.placeholder.com/50',
-      name: 'Athlete 2',
-      disciplines: [
-        { icon: 'swim', expertise: 4 },
-        { icon: 'bicycle', expertise: 5 },
-      ],
-      location: 'Los Angeles',
-    },
-    {
-      profilePic: 'https://via.placeholder.com/50',
-      name: 'Athlete 3',
-      disciplines: [
-        { icon: 'walk', expertise: 1 },
-        { icon: 'swim', expertise: 3 },
-        { icon: 'bicycle', expertise: 2 },
-      ],
-      location: 'Chicago',
-    },
-  ];
+  const fetchAthletes = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('range', range)
+        .eq('expertise', expertise)
+        .eq('gender', gender)
+        .limit(10);
+
+      if (error) throw error;
+      setAthletes(data);
+    } catch (error) {
+      console.error('Error fetching athletes:', error);
+      Alert.alert('No results found');
+    }
+  };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.header}>EXPLORE</Text>
-      <View style={styles.filterRow}>
-        <View style={styles.filterItem}>
-          <Text>Range:</Text>
-          <Picker selectedValue={range} onValueChange={(itemValue) => setRange(itemValue)}>
-            {[5, 10, 20, 30, 40].map((value) => (
-              <Picker.Item key={value} label={String(value)} value={String(value)} />
-            ))}
-          </Picker>
+    <SafeAreaView style={styles.container}>
+      <ScrollView keyboardShouldPersistTaps="handled">
+        <View style={styles.header}>
+          <Text style={styles.headerText}>EXPLORE</Text>
         </View>
-        <View style={styles.filterItem}>
-          <Text>Expertise:</Text>
-          <Picker selectedValue={expertise} onValueChange={(itemValue) => setExpertise(itemValue)}>
-            {[1, 2, 3, 4, 5].map((value) => (
-              <Picker.Item key={value} label={String(value)} value={String(value)} />
-            ))}
-          </Picker>
+        <View style={styles.filterRow}>
+          <View style={styles.filterItem}>
+            <Text>Range:</Text>
+            <DropDownPicker
+              items={[
+                { label: '5', value: '5' },
+                { label: '10', value: '10' },
+                { label: '20', value: '20' },
+                { label: '30', value: '30' },
+                { label: '40', value: '40' },
+              ]}
+              defaultValue={range}
+              containerStyle={{ height: 40 }}
+              style={{ backgroundColor: '#fafafa' }}
+              dropDownStyle={{ backgroundColor: '#fafafa' }}
+              onChangeItem={item => setRange(item.value)}
+            />
+          </View>
+          <View style={styles.filterItem}>
+            <Text>Expertise:</Text>
+            <DropDownPicker
+              items={[
+                { label: '1', value: '1' },
+                { label: '2', value: '2' },
+                { label: '3', value: '3' },
+                { label: '4', value: '4' },
+                { label: '5', value: '5' },
+              ]}
+              defaultValue={expertise}
+              containerStyle={{ height: 40 }}
+              style={{ backgroundColor: '#fafafa' }}
+              dropDownStyle={{ backgroundColor: '#fafafa' }}
+              onChangeItem={item => setExpertise(item.value)}
+            />
+          </View>
         </View>
-      </View>
-      <View style={styles.filterRow}>
-        <View style={styles.filterItem}>
-          <Text>Discipline:</Text>
-          <DisciplineDropdown
-            selectedDisciplines={selectedDisciplines}
-            setSelectedDisciplines={setSelectedDisciplines}
-          />
+        <View style={styles.filterRow}>
+          <View style={styles.filterItem}>
+            <Text>Discipline:</Text>
+            <DisciplineDropdown
+              selectedDisciplines={selectedDisciplines}
+              setSelectedDisciplines={setSelectedDisciplines}
+            />
+          </View>
+          <View style={styles.filterItem}>
+            <Text>Gender:</Text>
+            <DropDownPicker
+              items={[
+                { label: 'male', value: 'male' },
+                { label: 'female', value: 'female' },
+                { label: 'nonbinary', value: 'nonbinary' },
+              ]}
+              defaultValue={gender}
+              containerStyle={{ height: 40 }}
+              style={{ backgroundColor: '#fafafa' }}
+              dropDownStyle={{ backgroundColor: '#fafafa' }}
+              onChangeItem={item => setGender(item.value)}
+            />
+          </View>
         </View>
-        <View style={styles.filterItem}>
-          <Text>Gender:</Text>
-          <Picker selectedValue={gender} onValueChange={(itemValue) => setGender(itemValue)}>
-            {['male', 'female', 'nonbinary'].map((value) => (
-              <Picker.Item key={value} label={value} value={value} />
-            ))}
-          </Picker>
-        </View>
-      </View>
-      {athletes.map((athlete, index) => (
-        <AthleteView key={index} athlete={athlete} />
-      ))}
-    </ScrollView>
+        <TouchableOpacity style={styles.searchButton} onPress={fetchAthletes}>
+          <Text style={styles.searchButtonText}>Search</Text>
+        </TouchableOpacity>
+        {athletes.map((athlete, index) => (
+          <AthleteView key={index} athlete={athlete} />
+        ))}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -115,12 +136,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    marginHorizontal: 20,
   },
   header: {
-    fontSize: 32,
+    backgroundColor: 'orange',
+    height: '25%', // Takes up the top 25% of the screen
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+  },
+  headerText: {
+    color: 'white',
+    fontSize: 24,
     fontWeight: 'bold',
-    textAlign: 'center',
-    marginVertical: 20,
   },
   filterRow: {
     flexDirection: 'row',
@@ -168,5 +196,17 @@ const styles = StyleSheet.create({
   actionText: {
     color: 'white',
     textAlign: 'center',
+  },
+  searchButton: {
+    backgroundColor: 'blue',
+    borderRadius: 10,
+    padding: 10,
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  searchButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
