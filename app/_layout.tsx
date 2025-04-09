@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Slot, Stack, useRouter, useSegments } from "expo-router";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import Auth from "./components/Auth";
+import Auth from "./screens/Auth";
 import { View, ActivityIndicator } from "react-native";
 
 // This is a separate component that handles authentication logic

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Alert } from 'react-native';
 import SignUpFormStep1 from './SignUpFormStep1';
 import SignUpFormStep2 from './SignUpFormStep2';
+import SignUpFormStep3 from './SignUpFormStep3';
 import { supabase } from '../utils/supabaseClient';
 
 export default function SignUp() {
@@ -9,8 +10,9 @@ export default function SignUp() {
   const [formData, setFormData] = useState({});
 
   const handleNext = (data) => {
-    setFormData(data);
-    setStep(2);
+    setFormData({ ...formData, ...data });
+    console.log("FormData so far:", data);
+    setStep(step + 1);
   };
 
   const handleSubmit = async (additionalData) => {
@@ -22,7 +24,6 @@ export default function SignUp() {
       });
       if (error) throw error;
 
-      // Insert user data into the "users" table
       const { insertError } = await supabase
         .from('users')
         .insert([{
@@ -33,6 +34,7 @@ export default function SignUp() {
           bike_skill: parseInt(completeData.bikeSkill, 10),
           current_location: completeData.location,
           goal: completeData.goal || 'None',
+          image_url: completeData.profileImage,
         }]);
 
       if (insertError) throw insertError;
@@ -46,9 +48,11 @@ export default function SignUp() {
   return (
     <View>
       {step === 1 ? (
-        <SignUpFormStep1 onNext={handleNext} setStep={setStep} />
+        <SignUpFormStep1 onNext={handleNext} />
+      ) : step === 2 ? (
+        <SignUpFormStep2 onNext={handleNext} />
       ) : (
-        <SignUpFormStep2 onSubmit={handleSubmit} setStep={setStep} />
+        <SignUpFormStep3 onSubmit={handleSubmit} formData={formData} />
       )}
     </View>
   );
