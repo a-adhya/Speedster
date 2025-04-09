@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
 
-export default function SignUpFormStep1({ onNext, setStep }) {
+export default function SignUpFormStep1({ onNext }) {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

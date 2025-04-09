@@ -1,7 +1,7 @@
 import React from "react";
 import { Redirect } from "expo-router";
 import { useAuth } from "./context/AuthContext";
-import Auth from "./components/Auth";
+import Auth from "./screens/AuthScreen/Auth";
 import { View, ActivityIndicator } from "react-native";
 
 export default function Index() {

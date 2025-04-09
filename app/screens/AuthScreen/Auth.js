@@ -1,36 +1,16 @@
 import React, { useState } from 'react';
 import { Alert, StyleSheet, View, Text } from 'react-native';
 import { Button, Input } from '@rneui/themed';
-import { useAuth } from '../context/AuthContext';
-import SignUpFormStep1 from './SignUpFormStep1';
-import SignUpFormStep2 from './SignUpFormStep2';
+import { useAuth } from '../../context/AuthContext';
+import SignUpFormStep1 from '../../components/SignUpFormStep1';
+import SignUpFormStep2 from '../../components/SignUpFormStep2';
+import SignUp from '../../components/SignUp';
 
 export default function Auth() {
-  const [step, setStep] = useState(0); // 0 for sign-in, 1 for sign-up step 1, 2 for sign-up step 2
+  const [step, setStep] = useState(0); // 0 for sign-in, 1 for sign-up
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(false);
   const { signIn, signUp } = useAuth();
-
-  const handleNext = (data) => {
-    setFormData(data);
-    setStep(2);
-  };
-
-  const handleSubmitSignUp = async (additionalData) => {
-    const completeData = { ...formData, ...additionalData };
-    setLoading(true);
-    try {
-      const data = await signUp(completeData);
-      if (!data.session) {
-        Alert.alert('Verification email sent', 'Please check your inbox for email verification!');
-        setStep(0); // Reset to the initial sign-in form
-      }
-    } catch (error) {
-      Alert.alert('Error', error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSignIn = async () => {
     const { email, password } = formData;
@@ -50,9 +30,9 @@ export default function Auth() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Welcome to Speedster</Text>
       {step === 0 ? (
         <>
+        <Text style={styles.title}>Welcome to Speedster</Text>
           <Input
             placeholder="Email"
             value={formData.email}
@@ -83,10 +63,8 @@ export default function Auth() {
             />
           </View>
         </>
-      ) : step === 1 ? (
-        <SignUpFormStep1 onNext={handleNext} />
       ) : (
-        <SignUpFormStep2 onSubmit={handleSubmitSignUp} />
+        <SignUp />
       )}
     </View>
   );

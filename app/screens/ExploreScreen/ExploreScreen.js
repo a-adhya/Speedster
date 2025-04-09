@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
-import DropDownPicker from 'react-native-dropdown-picker';
-import { Ionicons } from '@expo/vector-icons';
-import DisciplineDropdown from '../../components/DisciplineDropdown';
+import SingleSelectDropdown from '../../components/SingleSelectDropdown';
+import MultiSelectDropdown from '../../components/MultiSelectDropdown';
 import { supabase } from '../../utils/supabaseClient';
 
 const AthleteView = ({ athlete }) => (
@@ -64,60 +63,54 @@ export default function ExploreScreen() {
         <View style={styles.filterRow}>
           <View style={styles.filterItem}>
             <Text>Range:</Text>
-            <DropDownPicker
-              items={[
+            <SingleSelectDropdown
+              options={[
                 { label: '5', value: '5' },
                 { label: '10', value: '10' },
                 { label: '20', value: '20' },
                 { label: '30', value: '30' },
                 { label: '40', value: '40' },
               ]}
-              defaultValue={range}
-              containerStyle={{ height: 40 }}
-              style={{ backgroundColor: '#fafafa' }}
-              dropDownStyle={{ backgroundColor: '#fafafa' }}
-              onChangeItem={item => setRange(item.value)}
+              selectedValue={range}
+              setSelectedValue={setRange}
+              zIndex={1000}
             />
           </View>
           <View style={styles.filterItem}>
             <Text>Expertise:</Text>
-            <DropDownPicker
-              items={[
+            <SingleSelectDropdown
+              options={[
                 { label: '1', value: '1' },
                 { label: '2', value: '2' },
                 { label: '3', value: '3' },
                 { label: '4', value: '4' },
                 { label: '5', value: '5' },
               ]}
-              defaultValue={expertise}
-              containerStyle={{ height: 40 }}
-              style={{ backgroundColor: '#fafafa' }}
-              dropDownStyle={{ backgroundColor: '#fafafa' }}
-              onChangeItem={item => setExpertise(item.value)}
+              selectedValue={expertise}
+              setSelectedValue={setExpertise}
+              zIndex={1000}
             />
           </View>
         </View>
         <View style={styles.filterRow}>
           <View style={styles.filterItem}>
             <Text>Discipline:</Text>
-            <DisciplineDropdown
+            <MultiSelectDropdown
               selectedDisciplines={selectedDisciplines}
               setSelectedDisciplines={setSelectedDisciplines}
             />
           </View>
           <View style={styles.filterItem}>
             <Text>Gender:</Text>
-            <DropDownPicker
-              items={[
-                { label: 'male', value: 'male' },
-                { label: 'female', value: 'female' },
-                { label: 'nonbinary', value: 'nonbinary' },
+            <SingleSelectDropdown
+              options={[
+                { label: 'Male', value: 'male' },
+                { label: 'Female', value: 'female' },
+                { label: 'Nonbinary', value: 'nonbinary' },
               ]}
-              defaultValue={gender}
-              containerStyle={{ height: 40 }}
-              style={{ backgroundColor: '#fafafa' }}
-              dropDownStyle={{ backgroundColor: '#fafafa' }}
-              onChangeItem={item => setGender(item.value)}
+              selectedValue={gender}
+              setSelectedValue={setGender}
+              zIndex={999}
             />
           </View>
         </View>

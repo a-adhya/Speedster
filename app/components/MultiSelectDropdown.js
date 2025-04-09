@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 const disciplines = ['run', 'swim', 'bike', 'triathlon'];
 
-export default function DisciplineDropdown({ selectedDisciplines, setSelectedDisciplines }) {
+export default function MultiSelectDropdown({ selectedDisciplines, setSelectedDisciplines }) {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleDiscipline = (discipline) => {
