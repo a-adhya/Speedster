@@ -3,9 +3,17 @@ import { View, Text, Image, StyleSheet, TouchableOpacity, Alert, ScrollView } fr
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Button } from 'react-native-paper';
 
-export default function ProfileScreen() {
+export default function RyanProfileScreen() {
   const handleFollowOnStrava = () => {
-    Alert.alert('Navigating to your Strava profile...');
+    Alert.alert('Successfully followed Ryan on Strava!');
+  };
+
+  const handleFollowPress = () => {
+    Alert.alert('You are now following Ryan Foster!');
+  };
+
+  const handleMessagePress = () => {
+    Alert.alert('Message button pressed');
   };
 
   const disciplineIcons = {
@@ -18,14 +26,14 @@ export default function ProfileScreen() {
   return (
     <ScrollView style={styles.container}>
       <Image
-        source={require('../../images/banner.jpeg')}
+        source={require('../../images/ryanbanner.jpg')}
         style={styles.banner}
         resizeMode="cover"
       />
       <View style={styles.profileSection}>
-        <Image source={require('../../images/shu2.jpg')} style={styles.profilePic} />
+        <Image source={require('../../images/ryan.jpg')} style={styles.profilePic} />
         <View style={styles.infoContainer}>
-          <Text style={styles.name}>Shu Adhya</Text>
+          <Text style={styles.name}>Ryan Foster</Text>
           <Text style={styles.location}>Ann Arbor</Text>
           <View style={styles.followContainer}>
             <TouchableOpacity style={styles.followBox}>
@@ -37,6 +45,14 @@ export default function ProfileScreen() {
               <Text style={styles.followText}>Following</Text>
             </TouchableOpacity>
           </View>
+          <View style={styles.buttonRow}>
+            <Button mode="contained" onPress={handleFollowPress} style={styles.followButton}>
+              Follow
+            </Button>
+            <Button mode="contained" onPress={handleMessagePress} style={styles.messageButton}>
+              Message
+            </Button>
+          </View>
         </View>
       </View>
       <View style={styles.detailsSection}>
@@ -45,28 +61,27 @@ export default function ProfileScreen() {
           <View style={styles.disciplinesContainer}>
             <MaterialCommunityIcons name="run" size={24} color="black" style={styles.disciplineIcon} />
             <MaterialCommunityIcons name="swim" size={24} color="black" style={styles.disciplineIcon} />
-            <MaterialCommunityIcons name="bike" size={24} color="black" style={styles.disciplineIcon} />
           </View>
         </View>
         <View style={styles.detailItem}>
           <Text style={styles.detailTitle}>Expertise</Text>
-          <Text style={styles.detailText}>Beginner</Text>
+          <Text style={styles.detailText}>Intermediate</Text>
         </View>
         <View style={styles.detailItem}>
           <Text style={styles.detailTitle}>Upcoming Races</Text>
-          <Text style={styles.detailText}>Big House 5K</Text>
+          <Text style={styles.detailText}>Ann Arbor Marathon</Text>
         </View>
         <View style={styles.detailItem}>
           <Text style={styles.detailTitle}>Availability</Text>
-          <Text style={styles.detailText}>Monday, Tuesday, Saturday</Text>
+          <Text style={styles.detailText}>Wednesday, Friday, Saturday, Sunday</Text>
         </View>
         <View style={styles.detailItem}>
           <Text style={styles.detailTitle}>Current Goal</Text>
-          <Text style={styles.detailText}>Complete an Olympic-Distance Triathlon</Text>
+          <Text style={styles.detailText}>Run a sub-4 marathon.</Text>
         </View>
       </View>
       <Button mode="contained" onPress={handleFollowOnStrava} style={styles.stravaButton}>
-        Your Strava Profile
+        Follow on Strava!
       </Button>
     </ScrollView>
   );
@@ -117,6 +132,18 @@ const styles = StyleSheet.create({
   followText: {
     fontSize: 16,
     color: 'gray',
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  followButton: {
+    backgroundColor: '#541743',
+    marginRight: 10,
+  },
+  messageButton: {
+    backgroundColor: '#43939A',
   },
   detailsSection: {
     padding: 20,

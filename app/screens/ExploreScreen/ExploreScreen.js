@@ -1,183 +1,159 @@
-import React, { useState, useEffect } from 'react';
-import { SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
-import SingleSelectDropdown from '../../components/SingleSelectDropdown';
+import React, { useState, useRef } from 'react';
+import { ScrollView, StyleSheet, View, Animated, ActivityIndicator, Image, Text, Alert } from 'react-native';
+import { Card, Title, Paragraph, Appbar, Badge, Button } from 'react-native-paper';
 import MultiSelectDropdown from '../../components/MultiSelectDropdown';
-import { supabase } from '../../utils/supabaseClient';
+import SingleSelectDropdown from '../../components/SingleSelectDropdown';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 
-const AthleteView = ({ athlete }) => (
-  <View style={styles.athleteContainer}>
-    <Image source={{ uri: athlete.profilePic }} style={styles.profilePic} />
-    <View style={styles.athleteInfo}>
-      <Text style={styles.athleteName}>{athlete.name}</Text>
-      <Text style={styles.athleteDetail}>
-        Disciplines: {athlete.disciplines.map((d, index) => (
-          <Text key={index}>
-            <Ionicons name={d.icon} size={16} /> ({d.expertise})
-          </Text>
-        ))}
-      </Text>
-      <Text style={styles.athleteDetail}>Current Location: {athlete.location}</Text>
-    </View>
-    <View style={styles.athleteActions}>
-      <TouchableOpacity style={styles.actionButton}>
-        <Text style={styles.actionText}>Follow</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.actionButton}>
-        <Text style={styles.actionText}>Message</Text>
-      </TouchableOpacity>
-    </View>
-  </View>
-);
+const hardCodedAthletes = [
+  { name: 'Ryan', location: 'Ann Arbor', disciplines: ['run', 'swim'], image: require('../../images/ryan.jpg') },
+  { name: 'Carolina', location: 'Ann Arbor', disciplines: ['run'], image: require('../../images/caro.jpg') },
+  { name: 'Isaac', location: 'Dexter', disciplines: ['bike', 'swim'], image: require('../../images/isak.jpg') },
+  { name: 'Ethan Smith', location: 'Canton', disciplines: ['bike'], image: require('../../images/antishu.jpg') },
+];
 
-const fetchLatLong = async (location) => {
-
-  const response = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${location}&key=${process.env.EXPO_PUBLIC_OPENCAGE_API_KEY}`);
-  const data = await response.json();
-  if (data.results.length > 0) {
-    return {
-      lat: data.results[0].geometry.lat,
-      lng: data.results[0].geometry.lng,
-    };
-  }
-  throw new Error('Location not found');
-};
-
-const fetchCitiesWithinRange = async (lat, lng, range) => {
-  const response = await fetch(`https://wft-geo-db.p.rapidapi.com/v1/geo/locations/${lat}${lng}/nearbyCities?radius=${range}`, {
-    method: 'GET',
-    headers: {
-      'X-RapidAPI-Key': process.env.EXPO_PUBLIC_GEODB_API_KEY,
-      'X-RapidAPI-Host': process.env.EXPO_PUBLIC_GEODB_URL,
-    },
-  });
-  const data = await response.json();
-  return data.data.map(city => city.city);
+const disciplineIcons = {
+  run: 'run',
+  swim: 'swim',
+  bike: 'bike',
+  triathlon: 'bike', // Use a relevant icon for triathlon
 };
 
 export default function ExploreScreen() {
-  const [range, setRange] = useState('5');
-  const [expertise, setExpertise] = useState('1');
+  const [hasNotifications, setHasNotifications] = useState(true);
+  const [range, setRange] = useState(null);
+  const [gender, setGender] = useState(null);
   const [selectedDisciplines, setSelectedDisciplines] = useState([]);
-  const [gender, setGender] = useState('male');
-  const [athletes, setAthletes] = useState([]);
-  const [userLocation, setUserLocation] = useState(null);
+  const [expertise, setExpertise] = useState(null);
+  const [showCards, setShowCards] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const cardOpacity = useRef(new Animated.Value(0)).current;
+  const router = useRouter();
 
-  useEffect(() => {
-    const fetchUserLocation = async () => {
-      try {
-        const sessionEmail = user.email.trim();
-        const { data, error } = await supabase
-          .from('users')
-          .select('current_location')
-          .eq('email', sessionEmail)
-          .single();
+  const handleNotificationPress = () => {
+    console.log('Notifications icon pressed');
+    // Handle notification logic here
+  };
 
-        if (error) throw error;
-        setUserLocation(data.current_location);
-      } catch (error) {
-        console.error('Error fetching user location:', error);
-      }
-    };
+  const handleSearchPress = () => {
+    setLoading(true);
+    setShowCards(false);
+    setTimeout(() => {
+      setLoading(false);
+      setShowCards(true);
+      Animated.timing(cardOpacity, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }).start();
+    }, 2000);
+  };
 
-    if (user) {
-      fetchUserLocation();
-    }
-  }, [user]);
-
-  const fetchAthletes = async () => {
-    try {
-      if (!userLocation) {
-        Alert.alert('Error', 'User location not found');
-        return;
-      }
-
-      const { lat, lng } = await fetchLatLong(userLocation);
-      const cities = await fetchCitiesWithinRange(lat, lng, range);
-
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .in('current_location', cities)
-        .eq('expertise', expertise)
-        .eq('gender', gender)
-        .limit(10);
-
-      if (error) throw error;
-      setAthletes(data);
-    } catch (error) {
-      console.error('Error fetching athletes:', error);
-      Alert.alert('No results found');
-    }
+  const handleClearPress = () => {
+    setShowCards(false);
+    cardOpacity.setValue(0);
+    setRange(null);
+    setGender(null);
+    setSelectedDisciplines([]);
+    setExpertise(null);
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView keyboardShouldPersistTaps="handled">
-        <View style={styles.header}>
-          <Text style={styles.headerText}>EXPLORE</Text>
+    <>
+      <Appbar.Header style={styles.appBar}>
+        <Appbar.Content title="Explore" titleStyle={styles.appBarTitle} />
+        <View>
+          <Appbar.Action
+            icon="bell"
+            color="white"
+            onPress={handleNotificationPress}
+          />
+          {hasNotifications && (
+            <Badge style={styles.badge} size={8} />
+          )}
         </View>
-        <View style={styles.filterRow}>
-          <View style={styles.filterItem}>
-            <Text>Range:</Text>
-            <SingleSelectDropdown
-              options={[
-                { label: '5', value: '5' },
-                { label: '10', value: '10' },
-                { label: '20', value: '20' },
-                { label: '30', value: '30' },
-                { label: '40', value: '40' },
-              ]}
-              selectedValue={range}
-              setSelectedValue={setRange}
-              zIndex={1000}
-            />
-          </View>
-          <View style={styles.filterItem}>
-            <Text>Expertise:</Text>
-            <SingleSelectDropdown
-              options={[
-                { label: '1', value: '1' },
-                { label: '2', value: '2' },
-                { label: '3', value: '3' },
-                { label: '4', value: '4' },
-                { label: '5', value: '5' },
-              ]}
-              selectedValue={expertise}
-              setSelectedValue={setExpertise}
-              zIndex={1000}
-            />
-          </View>
+      </Appbar.Header>
+      <View style={styles.dropdownContainer}>
+        <View style={styles.row}>
+          <SingleSelectDropdown
+            options={[{label: 'Select Range (mi)', value: 'range'}, { label: '5 mi', value: '5' }, { label: '10 mi', value: '10' }, { label: '20 mi', value: '20' }, { label: '30 mi', value: '30' }, { label: '40 mi', value: '40' }, { label: '50 mi', value: '50' }]}
+            selectedValue={range}
+            setSelectedValue={setRange}
+            zIndex={1000}
+            label="Select Range (mi)"
+          />
+          <SingleSelectDropdown
+            options={[{label: 'Select Gender', value: 'gender'}, { label: 'Male', value: 'male' }, { label: 'Female', value: 'female' }, { label: 'Non-binary', value: 'non-binary' }]}
+            selectedValue={gender}
+            setSelectedValue={setGender}
+            zIndex={1000}
+            label="Select Gender"
+          />
         </View>
-        <View style={styles.filterRow}>
-          <View style={styles.filterItem}>
-            <Text>Discipline:</Text>
-            <MultiSelectDropdown
-              selectedDisciplines={selectedDisciplines}
-              setSelectedDisciplines={setSelectedDisciplines}
-            />
-          </View>
-          <View style={styles.filterItem}>
-            <Text>Gender:</Text>
-            <SingleSelectDropdown
-              options={[
-                { label: 'Male', value: 'male' },
-                { label: 'Female', value: 'female' },
-                { label: 'Nonbinary', value: 'nonbinary' },
-              ]}
-              selectedValue={gender}
-              setSelectedValue={setGender}
-              zIndex={999}
-            />
-          </View>
+        <View style={styles.row}>
+          <MultiSelectDropdown
+            selectedDisciplines={selectedDisciplines}
+            setSelectedDisciplines={setSelectedDisciplines}
+            label="Select Disciplines"
+          />
+          <SingleSelectDropdown
+            options={[{label: 'Select Expertise', value: 'expertise'}, {label: 'Novice', value: 'novice'}, { label: 'Beginner', value: '1' }, { label: 'Intermediate', value: '2' }, { label: 'Advanced', value: '3' }]}
+            selectedValue={expertise}
+            setSelectedValue={setExpertise}
+            zIndex={999}
+            label="Select Expertise"
+          />
         </View>
-        <TouchableOpacity style={styles.searchButton} onPress={fetchAthletes}>
-          <Text style={styles.searchButtonText}>Search</Text>
-        </TouchableOpacity>
-        {athletes.map((athlete, index) => (
-          <AthleteView key={index} athlete={athlete} />
-        ))}
-      </ScrollView>
-    </SafeAreaView>
+        <Button mode="contained" onPress={handleSearchPress} style={styles.searchButton}>
+          Search
+        </Button>
+        <Button mode="outlined" onPress={handleClearPress} style={styles.clearButton}>
+          Clear
+        </Button>
+      </View>
+      {loading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#2F6569" />
+        </View>
+      )}
+      {showCards && (
+        <Animated.ScrollView style={[styles.container, { opacity: cardOpacity }]}>
+          {hardCodedAthletes.map((athlete, index) => (
+            <Card key={index} style={styles.card}>
+              <View style={styles.cardContent}>
+                <Image source={athlete.image} style={styles.cardImage} />
+                <View style={styles.cardText}>
+                  <Title>{athlete.name}</Title>
+                  <Paragraph>Location: {athlete.location}</Paragraph>
+                  <View style={styles.disciplinesContainer}>
+                    <Text style={styles.disciplinesLabel}>Disciplines:</Text>
+                    {athlete.disciplines.map((discipline) => (
+                      <MaterialCommunityIcons
+                        key={discipline}
+                        name={disciplineIcons[discipline]}
+                        size={24}
+                        color="black"
+                        style={styles.disciplineIcon}
+                      />
+                    ))}
+                  </View>
+                </View>
+                <View style={styles.cardButtons}>
+                <Button mode="contained" style={styles.followButton} onPress={() => Alert.alert('You are now following Ryan Foster!')}>
+                    Follow
+                  </Button>
+                  <Button mode="contained" style={styles.messageButton} onPress={() => router.navigate('../RyanProfileScreen/RyanProfileScreen')}>
+                    Profile
+                  </Button>
+                </View>
+              </View>
+            </Card>
+          ))}
+        </Animated.ScrollView>
+      )}
+    </>
   );
 }
 
@@ -185,75 +161,79 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    marginHorizontal: 20,
   },
-  header: {
-    backgroundColor: 'orange',
-    height: '25%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '100%',
-  },
-  headerText: {
-    color: 'white',
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  filterRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  filterItem: {
-    flex: 1,
-    marginHorizontal: 5,
-  },
-  athleteContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f0f0f0',
-    borderRadius: 10,
-    padding: 10,
+  card: {
     marginBottom: 10,
   },
-  profilePic: {
+  cardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+  },
+  cardImage: {
     width: 50,
     height: 50,
     borderRadius: 25,
     marginRight: 10,
   },
-  athleteInfo: {
+  cardText: {
     flex: 1,
+    justifyContent: 'center',
   },
-  athleteName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  athleteDetail: {
-    fontSize: 14,
-    color: 'gray',
-  },
-  athleteActions: {
+  cardButtons: {
+    flexDirection: 'column',
     justifyContent: 'space-between',
   },
-  actionButton: {
-    backgroundColor: '#007bff',
-    borderRadius: 5,
-    padding: 5,
-    marginVertical: 2,
+  followButton: {
+    backgroundColor: '#541743',
+    marginBottom: 5,
   },
-  actionText: {
-    color: 'white',
-    textAlign: 'center',
+  messageButton: {
+    backgroundColor: '#43939A',
+  },
+  appBar: {
+    backgroundColor: 'orange',
+    elevation: 4, // Adds elevation for the shadow effect
+  },
+  appBarTitle: {
+    color: 'white', // Set the title color to white
+  },
+  badge: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    backgroundColor: 'red',
+  },
+  dropdownContainer: {
+    padding: 20,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
   },
   searchButton: {
-    backgroundColor: 'blue',
-    padding: 10,
-    borderRadius: 5,
+    backgroundColor: '#2F6569',
+    marginBottom: 10,
+  },
+  clearButton: {
+    borderColor: '#2F6569',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  searchButtonText: {
-    color: 'white',
-    fontSize: 16,
+  disciplinesContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 5,
+  },
+  disciplinesLabel: {
+    marginRight: 5,
+    fontWeight: 'bold',
+  },
+  disciplineIcon: {
+    marginRight: 5,
   },
 });

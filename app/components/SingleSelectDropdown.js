@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-export default function SingleSelectDropdown({ options, selectedValue, setSelectedValue, zIndex }) {
+export default function SingleSelectDropdown({ options, selectedValue, setSelectedValue, zIndex, label }) {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleSelect = (value) => {
@@ -17,7 +17,7 @@ export default function SingleSelectDropdown({ options, selectedValue, setSelect
         onPress={() => setIsOpen(!isOpen)}
       >
         <Text style={styles.dropdownButtonText}>
-          {selectedValue ? options.find(option => option.value === selectedValue).label : 'Select an option'}
+          {selectedValue ? options.find(option => option.value === selectedValue).label : label}
         </Text>
         <Ionicons name={isOpen ? "chevron-up" : "chevron-down"} size={20} color="black" />
       </TouchableOpacity>
@@ -52,6 +52,7 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 5,
     backgroundColor: '#fff',
+    width: 168,
   },
   dropdownButtonText: {
     fontSize: 16,
