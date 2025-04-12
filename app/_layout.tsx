@@ -3,6 +3,12 @@ import { Slot, Stack, useRouter, useSegments } from "expo-router";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Auth from "./screens/Auth";
 import { View, ActivityIndicator } from "react-native";
+import { BottomNavigation } from 'react-native-paper';
+import AuthGuard from './AuthGuard';
+import HomeScreen from '../screens/HomeScreen/HomeScreen';
+import ExploreScreen from '../screens/ExploreScreen/ExploreScreen';
+import ProfileScreen from '../screens/ProfileScreen/ProfileScreen';
+import MessagesScreen from '../screens/MessagesScreen/MessagesScreen';
 
 // This is a separate component that handles authentication logic
 function AuthGuard() {
@@ -31,15 +37,36 @@ function AuthGuard() {
   return null;
 }
 
+const HomeRoute = () => <HomeScreen />;
+const ExploreRoute = () => <ExploreScreen />;
+const ProfileRoute = () => <ProfileScreen />;
+const MessagesRoute = () => <MessagesScreen />;
+
 // Root layout always renders a Slot
-export default function RootLayout() {
+export default function AuthenticatedLayout() {
+  const [index, setIndex] = React.useState(0);
+  const [routes] = React.useState([
+    { key: 'home', title: 'Home', icon: 'home' },
+    { key: 'explore', title: 'Explore', icon: 'compass' },
+    { key: 'messages', title: 'Messages', icon: 'chatbubbles' },
+    { key: 'profile', title: 'Profile', icon: 'account' },
+  ]);
+
+  const renderScene = BottomNavigation.SceneMap({
+    home: HomeRoute,
+    explore: ExploreRoute,
+    messages: MessagesRoute,
+    profile: ProfileRoute,
+  });
+
   return (
     <AuthProvider>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="(authenticated)" />
-      </Stack>
       <AuthGuard />
+      <BottomNavigation
+        navigationState={{ index, routes }}
+        onIndexChange={setIndex}
+        renderScene={renderScene}
+      />
     </AuthProvider>
   );
 }

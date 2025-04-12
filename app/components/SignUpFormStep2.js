@@ -3,7 +3,7 @@ import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 import SingleSelectDropdown from './SingleSelectDropdown';
 
-export default function SignUpFormStep2({ onNext }) {
+export default function SignUpFormStep2({ onNext, onBack }) {
   const [name, setName] = useState('');
   const [location, setLocation] = useState('');
   const [gender, setGender] = useState('Select Gender');
@@ -29,6 +29,10 @@ export default function SignUpFormStep2({ onNext }) {
       goal,
     };
     onNext({ ...currentFormData });
+  };
+
+  const handleBack = () => {
+    onBack();
   };
 
   return (
@@ -112,6 +116,7 @@ export default function SignUpFormStep2({ onNext }) {
         placeholder="Your goal"
       />
       <Button title="Next" onPress={handleNext} />
+      <Button title="Back" onPress={handleBack} />
     </View>
   );
 }

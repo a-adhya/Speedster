@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Image, StyleSheet, Alert, Button } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { supabase } from '../utils/supabaseClient';
 
-export default function SignUpFormStep3({ onSubmit }) {
+export default function SignUpFormStep3({ onSubmit, onBack }) {
   const [image, setImage] = useState(null);
 
   const pickImage = async () => {
@@ -52,6 +52,10 @@ export default function SignUpFormStep3({ onSubmit }) {
     }
   };
 
+  const handleBack = () => {
+    onBack();
+  };
+
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.imageContainer} onPress={pickImage}>
@@ -65,6 +69,7 @@ export default function SignUpFormStep3({ onSubmit }) {
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
         <Text style={styles.submitButtonText}>Submit</Text>
       </TouchableOpacity>
+      <Button title="Back" onPress={handleBack} />
     </View>
   );
 }

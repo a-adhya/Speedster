@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
 
-export default function SignUpFormStep1({ onNext }) {
+export default function SignUpFormStep1({ onNext, onBack }) {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -15,6 +15,10 @@ export default function SignUpFormStep1({ onNext }) {
       return Alert.alert('Error', 'Passwords do not match');
     }
     onNext({ email, password });
+  };
+
+  const handleBack = () => {
+    onBack();
   };
 
   return (
@@ -42,6 +46,7 @@ export default function SignUpFormStep1({ onNext }) {
         secureTextEntry
       />
       <Button title="Next" onPress={handleNext} />
+      <Button title="Back" onPress={handleBack} />
     </View>
   );
 }

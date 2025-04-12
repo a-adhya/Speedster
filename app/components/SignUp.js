@@ -15,6 +15,10 @@ export default function SignUp() {
     setStep(step + 1);
   };
 
+  const handleBack = () => {
+    setStep(step - 1);
+  };
+
   const handleSubmit = async (additionalData) => {
     const completeData = { ...formData, ...additionalData };
     try {
@@ -48,11 +52,11 @@ export default function SignUp() {
   return (
     <View>
       {step === 1 ? (
-        <SignUpFormStep1 onNext={handleNext} />
+        <SignUpFormStep1 onNext={handleNext} onBack={handleBack} />
       ) : step === 2 ? (
-        <SignUpFormStep2 onNext={handleNext} />
+        <SignUpFormStep2 onNext={handleNext} onBack={handleBack} />
       ) : (
-        <SignUpFormStep3 onSubmit={handleSubmit} formData={formData} />
+        <SignUpFormStep3 onSubmit={handleSubmit} onBack={handleBack} />
       )}
     </View>
   );

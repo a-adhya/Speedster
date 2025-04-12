@@ -29,19 +29,75 @@ const AthleteView = ({ athlete }) => (
   </View>
 );
 
+const fetchLatLong = async (location) => {
+
+  const response = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${location}&key=${process.env.EXPO_PUBLIC_OPENCAGE_API_KEY}`);
+  const data = await response.json();
+  if (data.results.length > 0) {
+    return {
+      lat: data.results[0].geometry.lat,
+      lng: data.results[0].geometry.lng,
+    };
+  }
+  throw new Error('Location not found');
+};
+
+const fetchCitiesWithinRange = async (lat, lng, range) => {
+  const response = await fetch(`https://wft-geo-db.p.rapidapi.com/v1/geo/locations/${lat}${lng}/nearbyCities?radius=${range}`, {
+    method: 'GET',
+    headers: {
+      'X-RapidAPI-Key': process.env.EXPO_PUBLIC_GEODB_API_KEY,
+      'X-RapidAPI-Host': process.env.EXPO_PUBLIC_GEODB_URL,
+    },
+  });
+  const data = await response.json();
+  return data.data.map(city => city.city);
+};
+
 export default function ExploreScreen() {
   const [range, setRange] = useState('5');
   const [expertise, setExpertise] = useState('1');
   const [selectedDisciplines, setSelectedDisciplines] = useState([]);
   const [gender, setGender] = useState('male');
   const [athletes, setAthletes] = useState([]);
+  const [userLocation, setUserLocation] = useState(null);
+
+  useEffect(() => {
+    const fetchUserLocation = async () => {
+      try {
+        const sessionEmail = user.email.trim();
+        const { data, error } = await supabase
+          .from('users')
+          .select('current_location')
+          .eq('email', sessionEmail)
+          .single();
+
+        if (error) throw error;
+        setUserLocation(data.current_location);
+      } catch (error) {
+        console.error('Error fetching user location:', error);
+      }
+    };
+
+    if (user) {
+      fetchUserLocation();
+    }
+  }, [user]);
 
   const fetchAthletes = async () => {
     try {
+      if (!userLocation) {
+        Alert.alert('Error', 'User location not found');
+        return;
+      }
+
+      const { lat, lng } = await fetchLatLong(userLocation);
+      const cities = await fetchCitiesWithinRange(lat, lng, range);
+
       const { data, error } = await supabase
         .from('users')
         .select('*')
-        .eq('range', range)
+        .in('current_location', cities)
         .eq('expertise', expertise)
         .eq('gender', gender)
         .limit(10);
@@ -133,7 +189,7 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: 'orange',
-    height: '25%', // Takes up the top 25% of the screen
+    height: '25%',
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
@@ -192,14 +248,12 @@ const styles = StyleSheet.create({
   },
   searchButton: {
     backgroundColor: 'blue',
-    borderRadius: 10,
     padding: 10,
+    borderRadius: 5,
     alignItems: 'center',
-    marginVertical: 20,
   },
   searchButtonText: {
     color: 'white',
     fontSize: 16,
-    fontWeight: 'bold',
   },
 });
