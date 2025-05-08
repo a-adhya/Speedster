@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text, TextInput, Button } from 'react-native-paper';
 
-export default function SignUpFormStep1({ onNext }) {
-
+export default function SignUpFormStep1({ onNext, onBack }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -19,29 +19,52 @@ export default function SignUpFormStep1({ onNext }) {
 
   return (
     <View style={styles.container}>
-      <Text>Email *</Text>
+      <Text variant="headlineSmall" style={styles.title}>Some Basic Information...</Text>
+      
       <TextInput
-        style={styles.input}
+        label="Email *"
         value={email}
         onChangeText={setEmail}
+        mode="outlined"
         keyboardType="email-address"
         autoCapitalize="none"
-      />
-      <Text>Password *</Text>
-      <TextInput
         style={styles.input}
+      />
+      
+      <TextInput
+        label="Password *"
         value={password}
         onChangeText={setPassword}
+        mode="outlined"
         secureTextEntry
-      />
-      <Text>Confirm Password *</Text>
-      <TextInput
         style={styles.input}
+      />
+      
+      <TextInput
+        label="Confirm Password *"
         value={confirmPassword}
         onChangeText={setConfirmPassword}
+        mode="outlined"
         secureTextEntry
+        style={styles.input}
       />
-      <Button title="Next" onPress={handleNext} />
+
+      <View style={styles.buttonContainer}>
+        <Button 
+          mode="outlined" 
+          onPress={onBack}
+          style={styles.button}
+        >
+          Back
+        </Button>
+        <Button 
+          mode="contained" 
+          onPress={handleNext}
+          style={styles.button}
+        >
+          Next
+        </Button>
+      </View>
     </View>
   );
 }
@@ -49,12 +72,25 @@ export default function SignUpFormStep1({ onNext }) {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
+    backgroundColor: '#FFA500',
+    flex: 1,
+  },
+  title: {
+    color: 'white',
+    marginBottom: 20,
+    textAlign: 'center',
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
     marginBottom: 10,
-    borderRadius: 5,
+    backgroundColor: 'white',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  button: {
+    flex: 1,
+    marginHorizontal: 5,
   },
 }); 

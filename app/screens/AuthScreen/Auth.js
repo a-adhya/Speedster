@@ -29,22 +29,26 @@ export default function Auth() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: '#FE7743' }]}>
       {step === 0 ? (
         <>
-        <Text style={styles.title}>Welcome to Speedster</Text>
+        <Text style={[styles.title, { color: 'white' }]}>Welcome to Speedster</Text>
           <Input
             placeholder="Email"
             value={formData.email}
             onChangeText={(value) => setFormData({ ...formData, email: value })}
             autoCapitalize="none"
             keyboardType="email-address"
+            inputStyle={{ color: 'white' }}
+            placeholderTextColor="rgba(255, 255, 255, 0.7)"
           />
           <Input
             placeholder="Password"
             value={formData.password}
             onChangeText={(value) => setFormData({ ...formData, password: value })}
             secureTextEntry
+            inputStyle={{ color: 'white' }}
+            placeholderTextColor="rgba(255, 255, 255, 0.7)"
           />
           <View style={[styles.verticallySpaced, styles.mt20]}>
             <Button 
@@ -54,7 +58,7 @@ export default function Auth() {
               buttonStyle={styles.button}
             />
           </View>
-          <Text style={styles.newToSpeedster}>New to Speedster?</Text>
+          <Text style={[styles.newToSpeedster, { color: 'white' }]}>New to Speedster?</Text>
           <View style={[styles.verticallySpaced, styles.mt20]}>
             <Button 
               title="Sign Up" 
@@ -93,6 +97,7 @@ const styles = StyleSheet.create({
   button: {
     borderRadius: 8,
     paddingVertical: 10,
+    backgroundColor: '#219ebc'
   },
   newToSpeedster: {
     textAlign: 'center',
